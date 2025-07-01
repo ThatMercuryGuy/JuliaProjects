@@ -1,3 +1,10 @@
+#=
+This program uses the HiGHS solver to derive a feasible solution for the
+Knight's Tour Chess Problem. We need to find a legal path for the knight
+such that it visits every square on the chess board exactly once.
+=#
+
+
 using JuMP
 import HiGHS
 
@@ -126,3 +133,7 @@ scatter!([x_coords[1]], [y_coords[1]], c=:green, marker=:circle, ms=8, label="St
 scatter!([x_coords[end]], [y_coords[end]], c=:green, marker=:circle, ms=8, label="End")
 plot!(x_coords, y_coords, lw=2, c=:red, marker=:circle, ms=4)
 
+MOI.get(model, MOI.ResultCount())
+#=Using the HiGHS solver supports finding only one feasible solution
+As there are multiple solutions to the problem, commercial solvers like Gurobi/CPLEX
+may be used to generate multiple solutions=#
