@@ -1,10 +1,17 @@
 using JuMP
 import HiGHS
 
+#Initializing model
 model = JuMP.Model(HiGHS.Optimizer)
 n = 64
-@variable(model, z[i in 1:n, j in 1:n], Bin)
 
+@variable(model, z[i in 1:n, j in 1:n], Bin)
+#=z[i, j] = 1 implies knight travels from square i -> square j
+n = 1 is A1, n = 2 is A2,...,n = 9 is B1, and so on until n = 64 which is H8
+https://en.wikipedia.org/wiki/Algebraic_notation_(chess)=#
+
+#=We will create a matrix legal such that legal[i, j] = 1
+iff a knight can legally move from square i to square j=#
 legal = zeros(Int, n, n)
 
 for i in 1:n
@@ -32,17 +39,25 @@ for i in 1:n
     end
 end
 
+#Every square needs an incoming edge
 @constraint(model, one_incoming_edge[j in 1:n], sum(z[i, j] for i in 1:n if i != j) == 1)
+
+#=Every square needs outgoing edge
+(last square visited can be assumed to loop back to first square)=#
 @constraint(model, one_outgoing_edge[i in 1:n], sum(z[i, j] for j in 1:n if i != j) == 1)
 
+#Ensuring that all edges declared in decision matrix z are legal for a knight in chess
 @constraint(model, [i=1:n, j=1:n], z[i, j] <= legal[i, j])
 @objective(model, Min, 0)
 
+#Miller-Tucker-Zemlin Subtour Elimination Constraint
 @variable(model, 1 <= place[1:n] <= n)
 @constraint(model, mtz[i in 1:n, j in 1:n; i != j && j != 1], n * (1 - z[i, j]) + place[i] >= place[j] + 1)
 
 optimize!(model)
 
+#Function to convert Int index of a given square to its name in algebraic notation
+#eg. index2chess(49) returns "G1"
 function index2chess(n::Int)
     alphas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     x, y = divrem(n - 1, 8)
