@@ -101,6 +101,7 @@ end
 order = extractOrder(z)
 natural_order = [index2chess(i) for i in order]
 
+#Visualisation (credit: Microsoft Copilot)
 using Plots
 
 # Prepare chessboard grid
@@ -133,7 +134,9 @@ scatter!([x_coords[1]], [y_coords[1]], c=:green, marker=:circle, ms=8, label="St
 scatter!([x_coords[end]], [y_coords[end]], c=:green, marker=:circle, ms=8, label="End")
 plot!(x_coords, y_coords, lw=2, c=:red, marker=:circle, ms=4)
 
-MOI.get(model, MOI.ResultCount())
+
+MOI.get(model, MOI.ResultCount()) #Returns 1 i.e. only 1 solution returned
+
 #=Using the HiGHS solver supports finding only one feasible solution
 As there are multiple solutions to the problem, commercial solvers like Gurobi/CPLEX
 may be used to generate multiple solutions=#
