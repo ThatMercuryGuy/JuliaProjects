@@ -3,6 +3,7 @@ import HiGHS
 
 #Initializing model
 model = JuMP.Model(HiGHS.Optimizer)
+
 n = 64
 
 @variable(model, z[i in 1:n, j in 1:n], Bin)
@@ -48,12 +49,13 @@ end
 
 #Ensuring that all edges declared in decision matrix z are legal for a knight in chess
 @constraint(model, [i=1:n, j=1:n], z[i, j] <= legal[i, j])
-@objective(model, Min, 0)
 
 #Miller-Tucker-Zemlin Subtour Elimination Constraint
 @variable(model, 1 <= place[1:n] <= n)
 @constraint(model, mtz[i in 1:n, j in 1:n; i != j && j != 1], n * (1 - z[i, j]) + place[i] >= place[j] + 1)
 
+#=As this is a feasibility problem and not an optimization problem,
+an objective function is not required=#
 optimize!(model)
 
 #Function to convert Int index of a given square to its name in algebraic notation
